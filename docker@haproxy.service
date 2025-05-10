@@ -1,0 +1,21 @@
+[Unit]
+Description=Docker HAProxy container
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+TimeoutStartSec=infinity
+ExecStartPre=/usr/bin/docker run -d -it --init --rm \
+             -p 80:80 -p 443:443 \
+             -v letsEncrypt:/etc/letsencrypt \
+             --name HAProxy --hostname HAProxy \
+             ghcr.io/fernandoenzo/haproxy:latest
+ExecStart=/usr/bin/docker logs -f HAProxy
+ExecStop=-/usr/bin/docker stop HAProxy
+Restart=always
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target
+
