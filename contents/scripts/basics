@@ -10,12 +10,16 @@ gpg -o /etc/apt/keyrings/haproxy.gpg --export --no-default-keyring --keyring /tm
 echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/haproxy.gpg] http://haproxy.debian.net bookworm-backports-3.1 main" > /etc/apt/sources.list.d/haproxy.list
 
 aptitude update ; apt-get install -y haproxy=3.1.\*
+aptitude install -y syslog-ng
 
-cp /tmp/contents/static/haproxy.cfg /etc/haproxy/
+cp /tmp/contents/static/syslog-ng/haproxy.conf /etc/syslog-ng/conf.d/
+
+cp /tmp/contents/static/haproxy/haproxy.cfg /etc/haproxy/
 mkdir -p /etc/haproxy/config.d/
 sed -i '/CONFIG=/a CONFIG_DIR=/etc/${BASENAME}/config.d/' /etc/init.d/haproxy
 sed -i '0,/.*-f "$CONFIG".*/!s|-f "$CONFIG"|& -f "$CONFIG_DIR"|g' /etc/init.d/haproxy
 
+sed -i '$i service syslog-ng start > /dev/null 2>&1' /usr/local/boot
 sed -i '$i service haproxy start > /dev/null 2>&1' /usr/local/boot
 
 apt-get -y autoremove ; aptitude -y autoclean ; apt-get -y autoclean
